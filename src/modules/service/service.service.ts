@@ -1,19 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Service, ServiceCategory } from '@prisma/client';
+import { CreateServiceDto } from './dto/create-service.dto';
+import { UpdateServiceDto } from './dto/update-service.dto';
 
 @Injectable()
 export class ServiceService {
   constructor(private prisma: PrismaService) {}
 
   // Service methods
-  async createService(data: {
-    name: string;
-    description?: string;
-    price: number;
-    duration: number;
-    businessId: number;
-  }): Promise<Service> {
+  async createService(data: CreateServiceDto): Promise<Service> {
     return this.prisma.service.create({
       data,
     });
@@ -36,7 +32,7 @@ export class ServiceService {
     });
   }
 
-  async updateService(id: number, data: Partial<Service>): Promise<Service> {
+  async updateService(id: number, data: UpdateServiceDto): Promise<Service> {
     return this.prisma.service.update({
       where: { id },
       data,
