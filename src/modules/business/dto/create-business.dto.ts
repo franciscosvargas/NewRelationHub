@@ -8,7 +8,48 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BusinessSegment } from '@prisma/client';
-import { BusinessJsonFields } from '../../../types/json-fields';
+
+export class AddressDto {
+  @IsString()
+  street: string;
+
+  @IsString()
+  number: string;
+
+  @IsOptional()
+  @IsString()
+  complement?: string;
+
+  @IsString()
+  neighborhood: string;
+
+  @IsString()
+  city: string;
+
+  @IsString()
+  state: string;
+
+  @IsString()
+  zipCode: string;
+}
+
+export class SocialDto {
+  @IsOptional()
+  @IsString()
+  instagram?: string;
+
+  @IsOptional()
+  @IsString()
+  whatsapp?: string;
+
+  @IsOptional()
+  @IsString()
+  facebook?: string;
+
+  @IsOptional()
+  @IsString()
+  googleMyBusiness?: string;
+}
 
 export class CreateBusinessDto {
   @IsString()
@@ -38,21 +79,11 @@ export class CreateBusinessDto {
 
   @IsOptional()
   @ValidateNested()
-  @Type(() => Object)
-  address?: BusinessJsonFields['address'];
+  @Type(() => AddressDto)
+  address?: AddressDto;
 
   @IsOptional()
   @ValidateNested()
-  @Type(() => Object)
-  social?: BusinessJsonFields['social'];
-
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => Object)
-  manyChatFlows?: BusinessJsonFields['manyChatFlows'];
-
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => Object)
-  credentials?: BusinessJsonFields['credentials'];
+  @Type(() => SocialDto)
+  social?: SocialDto;
 }
