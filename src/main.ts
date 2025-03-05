@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+// import { FirebaseAuthGuard } from './auth/guards/firebase-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,6 +28,10 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Aplicar o guard de autenticação globalmente (descomente para ativar)
+  // const firebaseAuthGuard = app.get(FirebaseAuthGuard);
+  // app.useGlobalGuards(firebaseAuthGuard);
 
   await app.listen(process.env.PORT ?? 3000);
 }
