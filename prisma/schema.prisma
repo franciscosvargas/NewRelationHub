@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Business {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  segment     BusinessSegment
+  taxId       String?     @map("tax_id") @db.Char(14)
+  email       String?     @unique
+  phone       String
+  website     String?
+  address     Json?
+  social      Json?
+  manyChatFlows Json?     @map("many_chat_flows")
+  credentials   Json?
+  activities    Activity[]
+  services     Service[]
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("businesses")
+}
+
+model Contact {
+  id          Int       @id @default(autoincrement())
+  fullName    String    @map("full_name")
+  firstName   String    @map("first_name")
+  lastName    String    @map("last_name")
+  taxId       String?   @map("tax_id") @db.Char(11)
+  email       String?   @unique
+  phone       String?
+  birthdate   DateTime?
+  address     Json?
+  channels    Json?
+  activities  Activity[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("contacts")
+}
+
+model Activity {
+  id                Int                @id @default(autoincrement())
+  contact          Contact             @relation(fields: [contactId], references: [id])
+  contactId        Int                 @map("contact_id")
+  business         Business            @relation(fields: [businessId], references: [id])
+  businessId       Int                 @map("business_id")
+  type             ActivityType
+  utm              Json?
+  appointmentDetails Json?             @map("appointment_details")
+  whatsappMessage   Json?              @map("whatsapp_message")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+
+  @@map("activities")
+}
+
+model Service {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  price       Decimal   @db.Decimal(10,2)
+  duration    Int       // duration in minutes
+  business    Business  @relation(fields: [businessId], references: [id])
+  businessId  Int       @map("business_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("services")
+}
+
+enum BusinessSegment {
+  BEAUTY
+  HEALTH
+  FOOD
+  SERVICES
+  RETAIL
+  OTHER
+}
+
+enum ActivityType {
+  WHATSAPP_MESSAGE
+  FROM_AD_WHATSAPP_MESSAGE
+  APPOINTMENT_BOOKED
+  APPOINTMENT_CANCELLED
+}
+
+enum WhatsappMessageType {
+  TEXT
+  IMAGE
+  DOCUMENT
+  AUDIO
+  VIDEO
+}
