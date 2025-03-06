@@ -14,148 +14,149 @@ datasource db {
 }
 
 model Business {
-  id          Int         @id @default(autoincrement())
+  id          Int             @id @default(autoincrement())
   name        String
   description String?
   segment     BusinessSegment
-  taxId       String?     @map("tax_id") @db.Char(14) @unique
-  email       String?     @unique
+  taxId       String?         @unique @map("tax_id") @db.Char(14)
+  email       String?         @unique
   phone       String
   website     String?
-  
-  addressId   Int?        @map("address_id") @unique
-  social      Json?
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
-  deletedAt   DateTime?   @map("deleted_at")
+
+  addressId Int?      @unique @map("address_id")
+  social    Json?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  users            User[]
+  integrations     Integration[]
+  activities       Activity[]
+  services         Service[]
+  address          Address?          @relation(fields: [addressId], references: [id])
+  businessContacts BusinessContact[]
 
   @@map("businesses")
-  integrations Integration[]
-  activities    Activity[]
-  services     Service[]
-  address     Address?    @relation(fields: [addressId], references: [id])
-  businessContacts BusinessContact[]
 }
 
 model Integration {
-  id          Int       @id @default(autoincrement())
-  business    Business  @relation(fields: [businessId], references: [id])
-  businessId  Int       @map("business_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-  credentials Json?
+  id             Int                @id @default(autoincrement())
+  business       Business           @relation(fields: [businessId], references: [id])
+  businessId     Int                @map("business_id")
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+  deletedAt      DateTime?          @map("deleted_at")
+  credentials    Json?
   additionalData Json?
-  service IntegrationService
-  
+  service        IntegrationService
+
   @@map("integrations")
 }
 
 model Address {
-  id          Int       @id @default(autoincrement())
-  street      String
-  number      String
-  complement  String?
+  id           Int       @id @default(autoincrement())
+  street       String
+  number       String
+  complement   String?
   neighborhood String
-  city        String
-  state       String
-  zipCode     String
-  businessId  Int?    @map("business_id") @unique
-  contactId   Int?    @map("contact_id") @unique
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+  city         String
+  state        String
+  zipCode      String
+  businessId   Int?      @unique @map("business_id")
+  contactId    Int?      @unique @map("contact_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  business     Business?
+  contact      Contact?
 
   @@map("addresses")
-  business Business?
-  contact Contact?
 }
 
 model Contact {
-  id          Int       @id @default(autoincrement())
-  fullName    String    @map("full_name")
-  firstName   String    @map("first_name")
-  lastName    String    @map("last_name")
-  taxId       String?   @map("tax_id") @db.Char(11)
-  email       String?   @unique
-  phone       String?
-  birthdate   DateTime?
-  addressId   Int?      @map("address_id") @unique
-  channels    Json?
-  activities  Activity[]
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+  id         Int        @id @default(autoincrement())
+  fullName   String     @map("full_name")
+  firstName  String     @map("first_name")
+  lastName   String     @map("last_name")
+  taxId      String?    @map("tax_id") @db.Char(11)
+  email      String?    @unique
+  phone      String?
+  birthdate  DateTime?
+  addressId  Int?       @unique @map("address_id")
+  channels   Json?
+  activities Activity[]
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  deletedAt  DateTime?  @map("deleted_at")
 
-  address     Address?  @relation(fields: [addressId], references: [id])
+  address          Address?          @relation(fields: [addressId], references: [id])
   businessContacts BusinessContact[]
 
   @@map("contacts")
 }
 
 model BusinessContact {
-  id          Int       @id @default(autoincrement())
-  business    Business  @relation(fields: [businessId], references: [id])
-  businessId  Int       @map("business_id")
-  contact     Contact   @relation(fields: [contactId], references: [id])
-  contactId   Int       @map("contact_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+  id         Int       @id @default(autoincrement())
+  business   Business  @relation(fields: [businessId], references: [id])
+  businessId Int       @map("business_id")
+  contact    Contact   @relation(fields: [contactId], references: [id])
+  contactId  Int       @map("contact_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
 
   @@unique([businessId, contactId])
   @@map("business_contacts")
 }
 
-
 model Activity {
-  id                Int                @id @default(autoincrement())
-  contact          Contact             @relation(fields: [contactId], references: [id])
-  contactId        Int                 @map("contact_id")
-  business         Business            @relation(fields: [businessId], references: [id])
-  businessId       Int                 @map("business_id")
-  type             ActivityType
-  utm              Json?
-  appointmentDetails Json?             @map("appointment_details")
-  whatsappMessage   Json?              @map("whatsapp_message")
-  createdAt        DateTime            @default(now()) @map("created_at")
-  updatedAt        DateTime            @updatedAt @map("updated_at")
+  id                 Int          @id @default(autoincrement())
+  contact            Contact      @relation(fields: [contactId], references: [id])
+  contactId          Int          @map("contact_id")
+  business           Business     @relation(fields: [businessId], references: [id])
+  businessId         Int          @map("business_id")
+  type               ActivityType
+  utm                Json?
+  appointmentDetails Json?        @map("appointment_details")
+  whatsappMessage    Json?        @map("whatsapp_message")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
 
   @@map("activities")
 }
 
 model Service {
-  id          Int       @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   name        String
   description String?
-  price       Decimal   @db.Decimal(10,2)
-  duration    Int       // duration in minutes
-  business    Business  @relation(fields: [businessId], references: [id])
-  businessId  Int       @map("business_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  price       Decimal             @db.Decimal(10, 2)
+  duration    Int // duration in minutes
+  business    Business            @relation(fields: [businessId], references: [id])
+  businessId  Int                 @map("business_id")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
   categories  ServiceToCategory[]
 
   @@map("services")
 }
 
 model ServiceCategory {
-  id          Int       @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   name        String
   description String?
   services    ServiceToCategory[]
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
 
   @@map("service_categories")
 }
 
 model ServiceToCategory {
-  service       Service        @relation(fields: [serviceId], references: [id])
-  serviceId     Int            @map("service_id")
-  category      ServiceCategory @relation(fields: [categoryId], references: [id])
-  categoryId    Int            @map("category_id")
-  assignedAt    DateTime       @default(now()) @map("assigned_at")
+  service    Service         @relation(fields: [serviceId], references: [id])
+  serviceId  Int             @map("service_id")
+  category   ServiceCategory @relation(fields: [categoryId], references: [id])
+  categoryId Int             @map("category_id")
+  assignedAt DateTime        @default(now()) @map("assigned_at")
 
   @@id([serviceId, categoryId])
   @@map("service_to_categories")
@@ -189,4 +190,26 @@ enum WhatsappMessageType {
   DOCUMENT
   AUDIO
   VIDEO
+}
+
+enum UserRoles {
+  SYSTEM_ADMIN
+  BUSINESS_ADMIN
+  BUSINESS_USER
+  BUSINESS_CUSTOM_ROLE
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  firebaseAuthId String    @unique
+  email          String    
+  name           String
+  role           UserRoles
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+  business       Business? @relation(fields: [businessId], references: [id])
+  businessId     Int?      @map("business_id")
+
+  @@map("users")
 }
