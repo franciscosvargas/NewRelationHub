@@ -15,9 +15,9 @@ export class BusinessGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const firebaseUser = request.user;
     const businessId = parseInt(
-      request.params.businessId ||
-        request.query.businessId ||
-        request.body.businessId,
+      request.params?.businessId ||
+        request.query?.businessId ||
+        request.body?.businessId,
     );
 
     if (!firebaseUser) {

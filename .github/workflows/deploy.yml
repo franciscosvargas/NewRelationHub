@@ -1,0 +1,55 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [ main ]  # Adjust this to your main branch name if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # Adjust to your Node.js version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          if_key_exists: replace
+
+      - name: Deploy to DigitalOcean
+        run: |
+          # Create a tar of the build directory
+          tar -czf build.tar.gz build/
+
+          # Copy the tar file to the server
+          scp build.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/
+
+          # SSH into the server, extract the tar file, and move files to the deployment directory
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            # Navigate to the home directory
+            cd ~/
+            
+            # Extract the tar file
+            tar -xzf build.tar.gz
+            
+            # Move the build files to your web server directory
+            # Adjust the path to match your server configuration
+            sudo rm -rf /var/www/html/*
+            sudo cp -r build/* /var/www/html/
+            
+            # Clean up
+            rm -rf build/ build.tar.gz
+          EOF
