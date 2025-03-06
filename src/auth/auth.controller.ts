@@ -56,8 +56,6 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtém o perfil do usuário autenticado' })
   getProfile(@Request() req: RequestWithUser): Record<string, unknown> {
-    // O req.user contém as informações do usuário autenticado
-    // que foram retornadas pelo método validate() da estratégia
     return req.user;
   }
 

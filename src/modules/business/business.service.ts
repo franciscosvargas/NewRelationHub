@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
 import { Prisma } from '@prisma/client';
+import { ListBusinessesQueryDto } from './dto/list-businesses-query.dto';
 
 @Injectable()
 export class BusinessService {
@@ -59,11 +60,18 @@ export class BusinessService {
     return business;
   }
 
-  async findAll() {
+  async findAll(query?: ListBusinessesQueryDto) {
+    const { orderBy, orderDirection } = query || {};
+
     return this.prisma.business.findMany({
       include: {
         address: true,
       },
+      orderBy: orderBy
+        ? {
+            [orderBy]: orderDirection || 'asc',
+          }
+        : undefined,
     });
   }
 

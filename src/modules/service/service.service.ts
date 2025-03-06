@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { Service, ServiceCategory } from '@prisma/client';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { ListServicesQueryDto } from './dto/list-services-query.dto';
 
 @Injectable()
 export class ServiceService {
@@ -15,8 +16,37 @@ export class ServiceService {
     });
   }
 
-  async findAllServices(): Promise<Service[]> {
-    return this.prisma.service.findMany();
+  async findAllServices(query?: ListServicesQueryDto): Promise<Service[]> {
+    const { businessId, categoryId, orderBy, orderDirection } = query || {};
+
+    return this.prisma.service.findMany({
+      where: {
+        AND: [
+          businessId ? { businessId } : {},
+          categoryId
+            ? {
+                categories: {
+                  some: {
+                    categoryId,
+                  },
+                },
+              }
+            : {},
+        ],
+      },
+      include: {
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+      },
+      orderBy: orderBy
+        ? {
+            [orderBy]: orderDirection || 'asc',
+          }
+        : undefined,
+    });
   }
 
   async findServiceById(id: number): Promise<Service | null> {
