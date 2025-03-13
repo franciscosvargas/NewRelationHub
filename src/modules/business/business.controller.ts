@@ -3,12 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   UseGuards,
   Query,
   ParseIntPipe,
+  Req,
 } from '@nestjs/common';
 import { BusinessService } from './business.service';
 import { CreateBusinessDto } from './dto/create-business.dto';
@@ -28,11 +29,14 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { UserRoles } from '@prisma/client';
 import { ListBusinessesQueryDto } from './dto/list-businesses-query.dto';
-
+import { UsersService } from '../users/users.service';
 @ApiTags('businesses')
 @Controller('businesses')
 export class BusinessController {
-  constructor(private readonly businessService: BusinessService) {}
+  constructor(
+    private readonly businessService: BusinessService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Post()
   @UseGuards(FirebaseAuthGuard, RolesGuard)
@@ -62,6 +66,26 @@ export class BusinessController {
     return this.businessService.findAll();
   }
 
+  @Get('my-businesses')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Get all businesses associated with the authenticated user',
+  })
+  @ApiResponse(BusinessResponseExamples.findAll)
+  async findMyBusinesses(@Req() req) {
+    const user = req.user;
+
+    const userData = await this.usersService.findByFirebaseId(user.uid);
+
+    // Se for SYSTEM_ADMIN, retorna todos os negócios
+    if (userData.role === UserRoles.SYSTEM_ADMIN) {
+      return this.businessService.findAll();
+    }
+
+    // Para outros usuários, retorna apenas os negócios associados
+    return this.businessService.findBusinessesByUserId(userData.id);
+  }
+
   @Get(':id')
   @UseGuards(FirebaseAuthGuard, RolesGuard, BusinessGuard)
   @Roles(
@@ -77,7 +101,7 @@ export class BusinessController {
     return this.businessService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(FirebaseAuthGuard, RolesGuard, BusinessGuard)
   @Roles(UserRoles.SYSTEM_ADMIN, UserRoles.BUSINESS_ADMIN)
   @ApiOperation({ summary: 'Update a business' })

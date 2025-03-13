@@ -58,6 +58,11 @@ export class ServiceService {
             category: true,
           },
         },
+        business: {
+          include: {
+            address: true,
+          },
+        },
       },
     });
   }

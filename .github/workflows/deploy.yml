@@ -27,7 +27,7 @@ jobs:
       run: |
         ssh ${{ secrets.SSH_USER }}@${{ secrets.DROPLET_IP }} '
           # Navigate to your project directory
-          cd /path/to/your/project
+          cd projects/crmkit-backend
           
           # Pull the latest code
           git pull origin main

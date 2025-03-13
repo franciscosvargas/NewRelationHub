@@ -1,9 +1,18 @@
-import { Controller, Post, Body, Get, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UserResponseDto } from './dto/user-response.dto';
 import { User, UserRoles } from '@prisma/client';
+import { FirebaseAuthGuard } from '../../auth/guards/firebase-auth.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -99,5 +108,34 @@ export class UsersController {
   })
   async findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOne(+id);
+  }
+
+  @Get('firebase/:firebaseId')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({ summary: 'Get user by Firebase ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns a user by Firebase ID',
+    type: UserResponseDto,
+    content: {
+      'application/json': {
+        example: {
+          id: 1,
+          email: 'user@example.com',
+          name: 'John Doe',
+          role: Object.values(UserRoles)[0],
+          businessId: 1,
+          firebaseAuthId: 'firebase_auth_id_123',
+          createdAt: '2024-03-15T10:30:00.000Z',
+          updatedAt: '2024-03-15T10:30:00.000Z',
+          deletedAt: null,
+        },
+      },
+    },
+  })
+  async findByFirebaseId(
+    @Param('firebaseId') firebaseId: string,
+  ): Promise<User> {
+    return this.usersService.findByFirebaseId(firebaseId);
   }
 }

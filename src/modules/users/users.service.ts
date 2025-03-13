@@ -103,4 +103,20 @@ export class UsersService {
 
     return user;
   }
+
+  async findByFirebaseId(firebaseId: string): Promise<User> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        firebaseAuthId: firebaseId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        `User with Firebase ID ${firebaseId} not found`,
+      );
+    }
+
+    return user;
+  }
 }
