@@ -54,44 +54,21 @@ export class ServiceController {
     return this.serviceService.createService(data);
   }
 
-  @Get(':id')
-  @UseGuards(FirebaseAuthGuard, RolesGuard, BusinessGuard)
-  @Roles(
-    UserRoles.SYSTEM_ADMIN,
-    UserRoles.BUSINESS_ADMIN,
-    UserRoles.BUSINESS_USER,
-  )
-  @ApiOperation({ summary: 'Get a service by id' })
-  @ApiParam({ name: 'id', description: 'Service ID' })
-  @ApiResponse(ServiceResponseExamples.findServiceById)
-  @ApiResponse(ServiceResponseExamples.notFound)
-  async findServiceById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<Service | null> {
-    return this.serviceService.findServiceById(id);
-  }
-
-  @Put(':id')
-  @UseGuards(FirebaseAuthGuard, RolesGuard, BusinessGuard)
-  @Roles(UserRoles.SYSTEM_ADMIN, UserRoles.BUSINESS_ADMIN)
-  @ApiOperation({ summary: 'Update a service' })
-  @ApiParam({ name: 'id', description: 'Service ID' })
-  @ApiResponse(ServiceResponseExamples.updateService)
-  async updateService(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() data: UpdateServiceDto,
-  ): Promise<Service> {
-    return this.serviceService.updateService(id, data);
-  }
-
-  @Delete(':id')
-  @UseGuards(FirebaseAuthGuard, RolesGuard, BusinessGuard)
-  @Roles(UserRoles.SYSTEM_ADMIN, UserRoles.BUSINESS_ADMIN)
-  @ApiOperation({ summary: 'Delete a service' })
-  @ApiParam({ name: 'id', description: 'Service ID' })
-  @ApiResponse(ServiceResponseExamples.deleteService)
-  async deleteService(@Param('id', ParseIntPipe) id: number): Promise<Service> {
-    return this.serviceService.deleteService(id);
+  @Get('categories')
+  @ApiOperation({ summary: 'Get all service categories' })
+  @ApiResponse(ServiceResponseExamples.findAllServiceCategories)
+  @ApiQuery({
+    name: 'businessId',
+    required: false,
+    type: Number,
+    description: 'Filter categories by business ID',
+  })
+  async findAllServiceCategories(
+    @Query('businessId') businessId?: string,
+  ): Promise<ServiceCategory[]> {
+    return this.serviceService.findAllServiceCategories(
+      businessId ? parseInt(businessId) : undefined,
+    );
   }
 
   @Post('categories')
@@ -103,15 +80,6 @@ export class ServiceController {
     @Body() data: CreateServiceCategoryDto,
   ): Promise<ServiceCategory> {
     return this.serviceService.createServiceCategory(data);
-  }
-
-  @Get('categories')
-  @UseGuards(FirebaseAuthGuard, RolesGuard, BusinessGuard)
-  @Roles(UserRoles.SYSTEM_ADMIN)
-  @ApiOperation({ summary: 'Get all service categories' })
-  @ApiResponse(ServiceResponseExamples.findAllServiceCategories)
-  async findAllServiceCategories(): Promise<ServiceCategory[]> {
-    return this.serviceService.findAllServiceCategories();
   }
 
   @Get('categories/:id')
@@ -153,6 +121,46 @@ export class ServiceController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ServiceCategory> {
     return this.serviceService.deleteServiceCategory(id);
+  }
+
+  @Get(':id')
+  @UseGuards(FirebaseAuthGuard, RolesGuard, BusinessGuard)
+  @Roles(
+    UserRoles.SYSTEM_ADMIN,
+    UserRoles.BUSINESS_ADMIN,
+    UserRoles.BUSINESS_USER,
+  )
+  @ApiOperation({ summary: 'Get a service by id' })
+  @ApiParam({ name: 'id', description: 'Service ID' })
+  @ApiResponse(ServiceResponseExamples.findServiceById)
+  @ApiResponse(ServiceResponseExamples.notFound)
+  async findServiceById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Service | null> {
+    return this.serviceService.findServiceById(id);
+  }
+
+  @Put(':id')
+  @UseGuards(FirebaseAuthGuard, RolesGuard, BusinessGuard)
+  @Roles(UserRoles.SYSTEM_ADMIN, UserRoles.BUSINESS_ADMIN)
+  @ApiOperation({ summary: 'Update a service' })
+  @ApiParam({ name: 'id', description: 'Service ID' })
+  @ApiResponse(ServiceResponseExamples.updateService)
+  async updateService(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateServiceDto,
+  ): Promise<Service> {
+    return this.serviceService.updateService(id, data);
+  }
+
+  @Delete(':id')
+  @UseGuards(FirebaseAuthGuard, RolesGuard, BusinessGuard)
+  @Roles(UserRoles.SYSTEM_ADMIN, UserRoles.BUSINESS_ADMIN)
+  @ApiOperation({ summary: 'Delete a service' })
+  @ApiParam({ name: 'id', description: 'Service ID' })
+  @ApiResponse(ServiceResponseExamples.deleteService)
+  async deleteService(@Param('id', ParseIntPipe) id: number): Promise<Service> {
+    return this.serviceService.deleteService(id);
   }
 
   @Post(':serviceId/categories/:categoryId')

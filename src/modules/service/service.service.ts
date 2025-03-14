@@ -84,14 +84,18 @@ export class ServiceService {
   async createServiceCategory(data: {
     name: string;
     description?: string;
+    businessId: number;
   }): Promise<ServiceCategory> {
     return this.prisma.serviceCategory.create({
       data,
     });
   }
 
-  async findAllServiceCategories(): Promise<ServiceCategory[]> {
+  async findAllServiceCategories(
+    businessId?: number,
+  ): Promise<ServiceCategory[]> {
     return this.prisma.serviceCategory.findMany({
+      where: businessId ? { businessId } : {},
       include: {
         services: {
           include: {
@@ -126,8 +130,9 @@ export class ServiceService {
   }
 
   async deleteServiceCategory(id: number): Promise<ServiceCategory> {
-    return this.prisma.serviceCategory.delete({
+    return this.prisma.serviceCategory.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 

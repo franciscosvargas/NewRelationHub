@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateServiceCategoryDto {
   @ApiProperty({
@@ -16,4 +16,11 @@ export class CreateServiceCategoryDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID of the business',
+  })
+  @IsNumber()
+  businessId: number;
 }

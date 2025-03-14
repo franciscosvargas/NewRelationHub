@@ -29,12 +29,13 @@ model Business {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  users            User[]
-  integrations     Integration[]
-  activities       Activity[]
-  services         Service[]
-  address          Address?          @relation(fields: [addressId], references: [id])
-  businessContacts BusinessContact[]
+  users             User[]
+  integrations      Integration[]
+  activities        Activity[]
+  services          Service[]
+  serviceCategories ServiceCategory[]
+  address           Address?          @relation(fields: [addressId], references: [id])
+  businessContacts  BusinessContact[]
 
   @@map("businesses")
 }
@@ -135,6 +136,7 @@ model Service {
   businessId  Int                 @map("business_id")
   createdAt   DateTime            @default(now()) @map("created_at")
   updatedAt   DateTime            @updatedAt @map("updated_at")
+  deletedAt   DateTime?           @map("deleted_at")
   categories  ServiceToCategory[]
 
   @@map("services")
@@ -147,6 +149,9 @@ model ServiceCategory {
   services    ServiceToCategory[]
   createdAt   DateTime            @default(now()) @map("created_at")
   updatedAt   DateTime            @updatedAt @map("updated_at")
+  deletedAt   DateTime?           @map("deleted_at")
+  business    Business            @relation(fields: [businessId], references: [id])
+  businessId  Int                 @map("business_id")
 
   @@map("service_categories")
 }
@@ -202,7 +207,7 @@ enum UserRoles {
 model User {
   id             Int       @id @default(autoincrement())
   firebaseAuthId String    @unique
-  email          String    
+  email          String
   name           String
   role           UserRoles
   createdAt      DateTime  @default(now()) @map("created_at")

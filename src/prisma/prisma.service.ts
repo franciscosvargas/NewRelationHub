@@ -10,33 +10,28 @@ export class PrismaService
 {
   constructor() {
     super();
-    // Middleware for soft delete operations
-    this.$use(async (params, next) => {
-      // Check if this is a delete operation
-      if (params.action === 'delete') {
-        // Change action to update
-        params.action = 'update';
-        params.args.data = { deletedAt: new Date() };
-      }
 
-      // Check if this is a deleteMany operation
-      if (params.action === 'deleteMany') {
-        // Change action to updateMany
-        params.action = 'updateMany';
-        if (params.args.data !== undefined) {
-          params.args.data.deletedAt = new Date();
-        } else {
-          params.args.data = { deletedAt: new Date() };
-        }
-      }
+    const modelsWithSoftDelete = [
+      'Business',
+      'Integration',
+      'Address',
+      'Contact',
+      'BusinessContact',
+      'User',
+      'Service',
+    ];
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return next(params);
-    });
+    // // Middleware for soft delete operations
+    // this.$use(async (params, next) => {
+
+    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    //   return next(params);
+    // });
 
     // Add middleware to exclude soft-deleted records
     this.$use(async (params, next) => {
       // List of models that have deletedAt field
+
       const modelsWithSoftDelete = [
         'Business',
         'Integration',
@@ -44,8 +39,8 @@ export class PrismaService
         'Contact',
         'BusinessContact',
         'User',
+        'Service',
       ];
-
       // Check if the model has soft delete capability
       if (params.model && modelsWithSoftDelete.includes(params.model)) {
         // For findUnique operations, convert to findFirst to apply filters
@@ -87,6 +82,24 @@ export class PrismaService
             }
           } else {
             params.args.where = { deletedAt: null };
+          }
+        }
+
+        // Check if this is a delete operation
+        if (params.action === 'delete') {
+          // Change action to update
+          params.action = 'update';
+          params.args.data = { deletedAt: new Date() };
+        }
+
+        // Check if this is a deleteMany operation
+        if (params.action === 'deleteMany') {
+          // Change action to updateMany
+          params.action = 'updateMany';
+          if (params.args.data !== undefined) {
+            params.args.data.deletedAt = new Date();
+          } else {
+            params.args.data = { deletedAt: new Date() };
           }
         }
       }
